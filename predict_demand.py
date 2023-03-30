@@ -96,3 +96,28 @@ print('accuracy:', round(accuracy, 2) )
 # prediction = xgb.predict(prediction_features)
 
 # print("Predicted value for {}: {}".format(prediction_date, prediction[0]))
+def predict_total_withdrawn(date):
+    pred_features = pd.DataFrame({
+                'trans_date_set': [date.day],
+                'trans_month': [date.month],
+                'trans_year': [date.year],
+                'prevweek_mean': [data[(data['trans_date_set'] >= (date - pd.Timedelta(weeks=1)).day) & (data['trans_date_set'] < date.day)]['total_amount_withdrawn'].mean()],
+                'weekday': [date.day_name()],
+                'festival_religion': ['NH'],
+                'working_day': ['W' if date.day_name() in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] else 'H'],
+                'holiday_sequence': ['WWW']
+            })
+    pred_features = pd.get_dummies(pred_features)
+
+    print(pred_features)
+    if date.day_name() in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']:
+        pred_features = pred_features.drop(columns = ['trans_date_set', 'trans_month', 'trans_year', 'working_day_W'])
+    else:
+        pred_features = pred_features.drop(columns = ['trans_date_set', 'trans_month', 'trans_year', 'working_day_H'])
+    total_withdrawn = xgb.predict(pred_features)
+    total_withdrawn = int(round(total_withdrawn[0]))
+    return total_withdrawn
+
+date = pd.to_datetime('2023-05-01')
+total_withdrawn = predict_total_withdrawn(date)
+print(f"Total amount withdrawn on {date.date()} is {total_withdrawn}.")
