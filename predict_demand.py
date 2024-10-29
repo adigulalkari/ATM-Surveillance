@@ -47,7 +47,7 @@ xgbpred.rename(columns = {0: 'xgb_predicted'}, inplace=True)
 
 # Round the predicted values to the nearest integer
 xgbpred = xgbpred.round(decimals=0)
-
+##
 # Set the index of the predicted values to be the same as the last 10 values of total_amount_withdrawn
 xgbpred.index = d.index
 
